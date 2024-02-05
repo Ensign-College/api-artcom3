@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { createClient }  from 'redis';
+import cors from 'cors';
 
 // Connect Redis
 const redisClient = createClient({
@@ -10,6 +11,8 @@ redisClient.on('error', err => console.log('Redis Client Error', err));
 await redisClient.connect();
 
 const app = express();
+
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -46,6 +49,6 @@ app.get('/boxes', async (req, res, next) => {
 
 
 
-app.listen(3000, () => {
-  console.log('Listen on Port: 3000')
+app.listen(3001, () => {
+  console.log('Listen on Port: 3001')
 });
