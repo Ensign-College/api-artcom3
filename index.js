@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { createClient }  from 'redis';
 import cors from 'cors';
+import { addUser } from './services/userService';
 
 // Connect Redis
 const redisClient = createClient({
@@ -41,6 +42,10 @@ app.post('/boxes/add', async (req, res, next) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
+
+app.post('/users/add', async (req, res, next) => {
+  addUser(redisClient, req.body.user);
+})
 
 app.get('/boxes', async (req, res, next) => {
   let boxes = await redisClient.json.get('boxes');
