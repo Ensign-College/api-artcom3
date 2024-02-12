@@ -1,13 +1,13 @@
-const addUser = async ({ redisClient, user }) => {
+export const addUser = async ({ redisClient, user }) => {
+  console.log(user);
   const customerKey = `customer:${user.phoneNumber}`;
   const existingCustomer = await redisClient.json.get(customerKey);
-  if (existingCustomer !== null) {
-      const userKey = `user:${user.phoneNumber}-${Date.now()}`;
+  if (!existingCustomer) {
+      const userKey = `user:${user.phoneNumber}`;
       // Create the user data in Redis
       await redisClient.json.set(userKey, '$', user);
+      return user;
   } else {
-      throw new Error(`Customer ${customerKey} does not exist`);
+      throw new Error(`Customer ${customerKey} exist`);
   }
 };
-
-export { addUser };

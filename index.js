@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { createClient }  from 'redis';
 import cors from 'cors';
-import { addUser } from './services/userService';
+import { addUser } from './services/userService.js';
 
 // Connect Redis
 const redisClient = createClient({
@@ -44,7 +44,14 @@ app.post('/boxes/add', async (req, res, next) => {
 });
 
 app.post('/users/add', async (req, res, next) => {
-  addUser(redisClient, req.body.user);
+  const user = {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    phoneNumber: req.body.phoneNumber
+  }
+  // console.log(req.body)
+  const response = await addUser({redisClient, user});
+  res.json({ success: true, message: 'User Created', response });
 })
 
 app.get('/boxes', async (req, res, next) => {
