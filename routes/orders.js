@@ -17,13 +17,17 @@ router.get("/:orderId", async (req, res) => {
 })
 
 router.post("/", async (req, res) => {
-  const { productQuiality, ShippingAdress } = req.body;
+
+  console.log(req.body);
+
+  const { customerId, ShippingAdress } = req.body;
   let responseStatus = 400;
 
-  if (productQuiality && ShippingAdress) {
+  if (customerId && ShippingAdress) {
     responseStatus = 200;
     try {
-      await addOrder({ redisClient, orders: req.body });
+      const order = await addOrder({ redisClient, order: req.body });
+      res.status(responseStatus).json(order);
     } catch (error) {
       console.error(error);
       return res.status(500).send("Internal Server Error");
@@ -32,11 +36,11 @@ router.post("/", async (req, res) => {
 
   if (responseStatus === 400) {
     return res.status(responseStatus).send(
-      `Missing one of the following fields: ${!productQuiality ? 'productQuiality' : ''}${!productQuiality && !ShippingAdress ? ', ' : ''}${!ShippingAdress ? 'ShippingAdress' : ''}`
+      `Missing one of the following fields: ${!customerId ? 'customerId' : ''}${!customerId && !ShippingAdress ? ', ' : ''}${!ShippingAdress ? 'ShippingAdress' : ''}`
     );
   }
 
-  res.status(responseStatus).send();
+  // res.status(responseStatus).send();
 });
 
 export { router as ordersRouter };
