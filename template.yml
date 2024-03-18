@@ -3,18 +3,7 @@ Transform: 'AWS::Serverless-2016-10-31'
 Description: Una aplicación Express.js convertida en una función Lambda
 
 Resources:
-  ExpressFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: app.handler
-      Runtime: nodejs20.x
-      CodeUri: .
-      Events:
-        HttpApi:
-          Type: HttpApi
-          Properties:
-            Path: /
-            Method: any
+  
 
 # AWSTemplateFormatVersion: '2010-09-09'
 # Transform: 'AWS::Serverless-2016-10-31'
@@ -77,5 +66,24 @@ Resources:
           FromPort: 6379
           ToPort: 6379
           CidrIp: 0.0.0.0/0
+
+  MyLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.handler
+      Runtime: nodejs20.x
+      CodeUri: .
+      MemorySize: 256  # Tamaño de memoria en MB
+      Timeout: 30  # Límite de tiempo de ejecución en segundos
+      Environment:
+        Variables:
+          REDIS_HOST: !GetAtt MyElasticacheRedis.RedisEndpoint.Address
+          REDIS_PORT: !GetAtt MyElasticacheRedis.RedisEndpoint.Port
+      Events:
+        HttpApi:
+          Type: HttpApi
+          Properties:
+            Path: /
+            Method: any
 
 
