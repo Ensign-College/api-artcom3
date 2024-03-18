@@ -7,7 +7,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: app.handler
-      Runtime: nodejs14.x
+      Runtime: nodejs20.x
       CodeUri: .
       Events:
         HttpApi:
@@ -23,7 +23,7 @@ Resources:
 # #  MyLambdaFunction:
 # #    Type: 'AWS::Serverless::Function'
 # #    Properties:
-# #      Handler: index.handler
+# #      Handler: app.handler
 # #      Runtime: nodejs14.x
 # #      CodeUri: ./lambda
 # #      MemorySize: 128
