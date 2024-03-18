@@ -1,10 +1,20 @@
-const express = require('express');
-const app = express();
+import redis from 'redis'
 
-app.use(express.json());
+// Obtener el host y el puerto de las variables de entorno
+const redisHost = process.env.REDIS_HOST;
+const redisPort = process.env.REDIS_PORT;
+
+const redisClient = redis.createClient({
+  host: redisHost,
+  port: redisPort,
+});
+
+redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
 
 exports.handler = async (event) => {
   const { httpMethod, body } = event;
+
+  event.redisClient = redisClient;
 
   if (httpMethod === 'GET') {
     return {
@@ -12,7 +22,6 @@ exports.handler = async (event) => {
       body: JSON.stringify({ message: 'GET request received' })
     };
   } else if (httpMethod === 'POST') {
-    // Aquí puedes manejar la lógica de tu aplicación Express.js para las solicitudes POST
     return {
       statusCode: 200,
       body: JSON.stringify({ message: 'POST request received', requestBody: body })
@@ -24,7 +33,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
-// Esto no será ejecutado cuando la función Lambda se invoque, solo necesitas exportar 'handler'
-// pero puedes mantener el resto de tu aplicación Express.js para pruebas locales, por ejemplo
-app.listen(3000, () => console.log('Express server listening on port 3000'));
