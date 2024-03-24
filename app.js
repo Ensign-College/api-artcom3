@@ -29,7 +29,7 @@ export const handler = async (event) => {
   } else {
     return {
       statusCode: 405,
-      body: JSON.stringify({ message: 'Method Not Allowed' })
+      body: JSON.stringify({ message: 'Method Not Allowed', event })
     };
   }
 };
