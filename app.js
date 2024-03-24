@@ -11,7 +11,7 @@
 
 // redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   const { httpMethod, body } = event;
 
   // event.redisClient = redisClient;
