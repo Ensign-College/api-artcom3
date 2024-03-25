@@ -67,6 +67,10 @@ Resources:
         - IpProtocol: tcp
           FromPort: 6379
           ToPort: 6379
+          SourceSecurityGroupId: !GetAtt MySecurityGroup.GroupId
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
           CidrIp: 0.0.0.0/0
 
   MyLambdaFunction:

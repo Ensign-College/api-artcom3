@@ -8,8 +8,8 @@ const redisPort = process.env.REDIS_PORT;
 
 const redisClient = redis.createClient({
   socket: {
-    host: '<hostname>',
-    port: '<port>'
+    host: redisHost,
+    port: redisPort
   },
   tls: {},
   ssl: true,
