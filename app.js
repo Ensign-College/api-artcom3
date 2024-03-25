@@ -7,8 +7,10 @@ const redisPort = process.env.REDIS_PORT;
 
 
 const redisClient = redis.createClient({
-  host: redisHost,
-  port: redisPort,
+  socket: {
+    host: redisHost,
+    port: redisPort,
+  }
 });
 
 
