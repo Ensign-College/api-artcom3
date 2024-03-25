@@ -76,6 +76,8 @@ export const handler = async (event) => {
 
     const response = await addUser({redisClient, user});
 
+    await redisClient.disconnect();
+
     return {
       statusCode: 200,
       body: JSON.stringify({ message: 'GET request received', event, response })
