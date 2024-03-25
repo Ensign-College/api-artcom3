@@ -15,6 +15,9 @@ const redisClient = redis.createClient({
 redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
 
 const addUser = async ({ redisClient, user }) => {
+
+  redisClient.connect();
+
   const customerKey = `customer:${user.phoneNumber}`;
   const existingCustomer = await redisClient.json.get(customerKey);
   if (!existingCustomer) {
