@@ -63,7 +63,6 @@ export const handler = async (event) => {
 
   } else if (httpMethod === 'GET') {
 
-    const body = JSON.parse(event.body);
     const redisClient = await event.redisClient
 
     const user = {
