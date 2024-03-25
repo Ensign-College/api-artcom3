@@ -1,5 +1,5 @@
 import redis from 'redis'
-import { postUserHandler } from './handlers/users';
+import { postUserHandler } from './handlers/users.js';
 
 // Obtener el host y el puerto de las variables de entorno
 const redisHost = process.env.REDIS_HOST;
