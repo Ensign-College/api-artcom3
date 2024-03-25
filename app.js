@@ -1,20 +1,20 @@
-// import redis from 'redis'
+import redis from 'redis'
 
-// // Obtener el host y el puerto de las variables de entorno
-// const redisHost = process.env.REDIS_HOST;
-// const redisPort = process.env.REDIS_PORT;
+// Obtener el host y el puerto de las variables de entorno
+const redisHost = process.env.REDIS_HOST;
+const redisPort = process.env.REDIS_PORT;
 
-// const redisClient = redis.createClient({
-//   host: redisHost,
-//   port: redisPort,
-// });
+const redisClient = redis.createClient({
+  host: redisHost,
+  port: redisPort,
+});
 
-// redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
+redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
 
 export const handler = async (event) => {
   const { requestContext, rawPath, body } = event;
 
-  const httpMethod = requestContext.http.method;
+  const httpMethod = requestContext.http.method ?? '';
 
   // event.redisClient = redisClient;
 
