@@ -5,18 +5,9 @@ import redis from 'redis'
 const redisHost = process.env.REDIS_HOST;
 const redisPort = process.env.REDIS_PORT;
 
-const redisClient = redis.createClient({
-  host: redisHost,
-  port: redisPort,
-});
 
-
-
-redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
 
 const addUser = async ({ redisClient, user }) => {
-
-  redisClient.connect();
 
   const customerKey = `customer:${user.phoneNumber}`;
   const existingCustomer = await redisClient.json.get(customerKey);
@@ -30,11 +21,19 @@ const addUser = async ({ redisClient, user }) => {
 };
 
 export const handler = async (event) => {
+
+  const redisClient = redis.createClient({
+    host: redisHost,
+    port: redisPort,
+  });
+  
+  redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
+
+
   const { requestContext, rawPath, body } = event;
 
   const httpMethod = requestContext.http.method ?? '';
 
-  event.redisClient = redisClient;
 
   if (rawPath === '/users' && httpMethod === 'POST') {
     // return postUserHandler(event);
