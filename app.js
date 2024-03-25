@@ -1,4 +1,5 @@
 import redis from 'redis'
+import { postUserHandler } from './handlers/users';
 
 // Obtener el host y el puerto de las variables de entorno
 const redisHost = process.env.REDIS_HOST;
@@ -18,16 +19,20 @@ export const handler = async (event) => {
 
   event.redisClient = redisClient;
 
-  if (httpMethod === 'GET') {
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'GET request received', event })
-    };
-  } else if (httpMethod === 'POST') {
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'POST request received', event, requestBody: body })
-    };
+  if (rawPath === '/users' && httpMethod === 'POST') {
+    return postUserHandler(event);
+  
+
+  // if (httpMethod === 'GET') {
+  //   return {
+  //     statusCode: 200,
+  //     body: JSON.stringify({ message: 'GET request received', event })
+  //   };
+  // } else if (httpMethod === 'POST') {
+  //   return {
+  //     statusCode: 200,
+  //     body: JSON.stringify({ message: 'POST request received', event, requestBody: body })
+  //   };
   } else {
     return {
       statusCode: 405,
