@@ -12,18 +12,17 @@ const redisClient = redis.createClient({
 
 redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
 
-const addUser = async ({ redisClient, user }) => {
-  console.log(user);
-  const customerKey = `customer:${user.phoneNumber}`;
-  const existingCustomer = await redisClient.json.get(customerKey);
-  if (!existingCustomer) {
-      // Create the user data in Redis
-      await redisClient.json.set(customerKey, '$', user);
-      return user;
-  } else {
-      throw new Error(`Customer ${customerKey} exist`);
-  }
-};
+// const addUser = async ({ redisClient, user }) => {
+//   const customerKey = `customer:${user.phoneNumber}`;
+//   const existingCustomer = await redisClient.json.get(customerKey);
+//   if (!existingCustomer) {
+//       // Create the user data in Redis
+//       await redisClient.json.set(customerKey, '$', user);
+//       return user;
+//   } else {
+//       throw new Error(`Customer ${customerKey} exist`);
+//   }
+// };
 
 export const handler = async (event) => {
   const { requestContext, rawPath, body } = event;
@@ -44,9 +43,14 @@ export const handler = async (event) => {
       phoneNumber: body.phoneNumber
     }
     // console.log(req.body)
-    const response = await addUser({redisClient, user});
+    // const response = await addUser({redisClient, user});
     
-    res.json({ success: true, message: 'User Created', response });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'User Created', event, user, redisHost, redisPort })
+    };
+
+    // return ({ success: true, message: 'User Created', response });
   
 
   // if (httpMethod === 'GET') {
