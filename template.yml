@@ -4,6 +4,29 @@ Description: Lambda App
 
 Resources:
   
+
+# AWSTemplateFormatVersion: '2010-09-09'
+# Transform: 'AWS::Serverless-2016-10-31'
+
+# Resources:
+# #  MyLambdaFunction:
+# #    Type: 'AWS::Serverless::Function'
+# #    Properties:
+# #      Handler: app.handler
+# #      Runtime: nodejs14.x
+# #      CodeUri: ./lambda
+# #      MemorySize: 128
+# #      Timeout: 30
+# #      Environment:
+# #        Variables:
+# #          REDIS_HOST: !GetAtt MyElasticacheRedis.RedisEndpointAddress
+# #      Events:
+# #        MyApi:
+# #          Type: Api
+# #          Properties:
+# #            Path: /myendpoint
+# #            Method: get
+
   MyVPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -20,6 +43,7 @@ Resources:
     Properties:
       Description: Subnet group for ElastiCache
       SubnetIds:
+        # - subnet-02c217f126c0ce1d5
         - !Ref MySubnet
 
   MyElasticacheRedis:
@@ -36,17 +60,14 @@ Resources:
   MySecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Security group for Lambda function and ElastiCache
+      GroupDescription: Security group for Lambda function
+      # VpcId: vpc-066e6a637e37f2752
       VpcId: !Ref MyVPC
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 6379
           ToPort: 6379
-          SourceSecurityGroupId: !GetAtt MySecurityGroup.GroupId  # Permitir acceso desde el mismo grupo de seguridad (VPC)
-        # - IpProtocol: tcp
-        #   FromPort: 6379
-        #   ToPort: 6379
-        #   CidrIp: 0.0.0.0/0  # Permitir acceso desde cualquier lugar
+          CidrIp: 0.0.0.0/0
 
   MyLambdaFunction:
     Type: AWS::Serverless::Function
@@ -56,13 +77,6 @@ Resources:
       CodeUri: ./lambda-function.zip
       MemorySize: 256  # Tamaño de memoria en MB
       Timeout: 30  # Límite de tiempo de ejecución en segundos
-      Policies:
-        - AmazonElastiCacheFullAccess
-      VpcConfig:
-        SecurityGroupIds:
-          - !GetAtt MySecurityGroup.GroupId
-        SubnetIds:
-          - !Ref MySubnet
       Environment:
         Variables:
           REDIS_HOST: !GetAtt MyElasticacheRedis.RedisEndpoint.Address
@@ -73,102 +87,5 @@ Resources:
           Properties:
             Path: /
             Method: any
-
-
-# AWSTemplateFormatVersion: '2010-09-09'
-# Transform: 'AWS::Serverless-2016-10-31'
-# Description: Lambda App
-
-# Resources:
-  
-
-# # AWSTemplateFormatVersion: '2010-09-09'
-# # Transform: 'AWS::Serverless-2016-10-31'
-
-# # Resources:
-# # #  MyLambdaFunction:
-# # #    Type: 'AWS::Serverless::Function'
-# # #    Properties:
-# # #      Handler: app.handler
-# # #      Runtime: nodejs14.x
-# # #      CodeUri: ./lambda
-# # #      MemorySize: 128
-# # #      Timeout: 30
-# # #      Environment:
-# # #        Variables:
-# # #          REDIS_HOST: !GetAtt MyElasticacheRedis.RedisEndpointAddress
-# # #      Events:
-# # #        MyApi:
-# # #          Type: Api
-# # #          Properties:
-# # #            Path: /myendpoint
-# # #            Method: get
-
-#   MyVPC:
-#     Type: AWS::EC2::VPC
-#     Properties:
-#       CidrBlock: 10.0.0.0/16
-
-#   MySubnet:
-#     Type: AWS::EC2::Subnet
-#     Properties:
-#       VpcId: !Ref MyVPC
-#       CidrBlock: 10.0.0.0/24
-
-#   MyElasticacheSubnetGroup:
-#     Type: AWS::ElastiCache::SubnetGroup
-#     Properties:
-#       Description: Subnet group for ElastiCache
-#       SubnetIds:
-#         # - subnet-02c217f126c0ce1d5
-#         - !Ref MySubnet
-
-#   MyElasticacheRedis:
-#     Type: 'AWS::ElastiCache::CacheCluster'
-#     Properties:
-#       CacheNodeType: cache.t2.micro
-#       Engine: redis
-#       NumCacheNodes: 1
-#       Port: 6379
-#       VpcSecurityGroupIds:
-#         - !GetAtt MySecurityGroup.GroupId
-#       CacheSubnetGroupName: !Ref MyElasticacheSubnetGroup
-
-#   MySecurityGroup:
-#     Type: AWS::EC2::SecurityGroup
-#     Properties:
-#       GroupDescription: Security group for Lambda function
-#       # VpcId: vpc-066e6a637e37f2752
-#       VpcId: !Ref MyVPC
-#       SecurityGroupIngress:
-#         - IpProtocol: tcp
-#           FromPort: 6379
-#           ToPort: 6379
-#           SourceSecurityGroupId: !GetAtt MySecurityGroup.GroupId
-#         - IpProtocol: tcp
-#           FromPort: 6379
-#           ToPort: 6379
-#           CidrIp: 0.0.0.0/0
-
-#   MyLambdaFunction:
-#     Type: AWS::Serverless::Function
-#     Properties:
-#       Handler: app.handler
-#       Runtime: nodejs20.x
-#       CodeUri: ./lambda-function.zip
-#       MemorySize: 256  # Tamaño de memoria en MB
-#       Timeout: 30  # Límite de tiempo de ejecución en segundos
-#       Policies:
-#         - AmazonElastiCacheFullAccess
-#       Environment:
-#         Variables:
-#           REDIS_HOST: !GetAtt MyElasticacheRedis.RedisEndpoint.Address
-#           REDIS_PORT: !GetAtt MyElasticacheRedis.RedisEndpoint.Port
-#       Events:
-#         HttpApi:
-#           Type: HttpApi
-#           Properties:
-#             Path: /
-#             Method: any
 
 
