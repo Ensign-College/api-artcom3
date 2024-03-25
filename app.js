@@ -21,12 +21,12 @@ export const handler = async (event) => {
   if (httpMethod === 'GET') {
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'GET request received' })
+      body: JSON.stringify({ message: 'GET request received', event })
     };
   } else if (httpMethod === 'POST') {
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'POST request received', requestBody: body })
+      body: JSON.stringify({ message: 'POST request received', event, requestBody: body })
     };
   } else {
     return {
