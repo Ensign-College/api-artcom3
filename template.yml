@@ -43,10 +43,10 @@ Resources:
           FromPort: 6379
           ToPort: 6379
           SourceSecurityGroupId: !GetAtt MySecurityGroup.GroupId  # Permitir acceso desde el mismo grupo de seguridad (VPC)
-        - IpProtocol: tcp
-          FromPort: 6379
-          ToPort: 6379
-          CidrIp: 0.0.0.0/0  # Permitir acceso desde cualquier lugar
+        # - IpProtocol: tcp
+        #   FromPort: 6379
+        #   ToPort: 6379
+        #   CidrIp: 0.0.0.0/0  # Permitir acceso desde cualquier lugar
 
   MyLambdaFunction:
     Type: AWS::Serverless::Function
