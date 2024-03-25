@@ -9,7 +9,7 @@ const redisPort = process.env.REDIS_PORT;
 
 const addUser = async ({ redisClient, user }) => {
 
-  await redis.redisClient.connect()
+  await redisClient.connect()
 
   const customerKey = `customer:${user.phoneNumber}`;
   const existingCustomer = await redisClient.json.get(customerKey);
