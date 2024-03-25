@@ -6,27 +6,21 @@ const redisHost = process.env.REDIS_HOST;
 const redisPort = process.env.REDIS_PORT;
 
 
-// const redisClient = redis.createClient({
-//   socket: {
-//     host: redisHost,
-//     port: redisPort
-//   },
-//   tls: {},
-//   ssl: true,
-// });
-
 const redisClient = redis.createClient({
-  host: redisHost,
-  port: redisPort
+  socket: {
+    host: redisHost,
+    port: redisPort
+  },
+  tls: {},
+  ssl: true,
 });
-
 
 
 redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
 
 const addUser = async ({ redisClient, user }) => {
 
-  await redisClient.connect();
+  // await redisClient.connect();
 
   const customerKey = `customer:${user.phoneNumber}`;
   const existingCustomer = await redisClient.json.get(customerKey);
