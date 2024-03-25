@@ -61,16 +61,28 @@ export const handler = async (event) => {
     // return ({ success: true, message: 'User Created', response });
   
 
-  // if (httpMethod === 'GET') {
-  //   return {
-  //     statusCode: 200,
-  //     body: JSON.stringify({ message: 'GET request received', event })
-  //   };
-  // } else if (httpMethod === 'POST') {
-  //   return {
-  //     statusCode: 200,
-  //     body: JSON.stringify({ message: 'POST request received', event, requestBody: body })
-  //   };
+  } else if (httpMethod === 'GET') {
+
+    const body = JSON.parse(event.body);
+    const redisClient = await event.redisClient
+
+    const user = {
+      firstName: "Kevin",
+      lastName: "Haro",
+      phoneNumber: 3854615172
+    }
+
+    const response = await addUser({redisClient, user});
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'GET request received', event, response })
+    };
+  } else if (httpMethod === 'POST') {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'POST request received', event, requestBody: body })
+    };
   } else {
     return {
       statusCode: 405,
