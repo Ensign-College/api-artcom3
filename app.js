@@ -20,7 +20,7 @@ redisClient.on('error', err => console.error('Error de conexión con ElastiCache
 
 const addUser = async ({ redisClient, user }) => {
 
-  // await redisClient.connect();
+  await redisClient.connect();
 
   const customerKey = `customer:${user.phoneNumber}`;
   const existingCustomer = await redisClient.json.get(customerKey);
@@ -53,6 +53,8 @@ export const handler = async (event) => {
     }
     // console.log(req.body)
     const response = await addUser({redisClient, user});
+    
+    await redisClient.disconnect();
     
     return {
       statusCode: 200,
