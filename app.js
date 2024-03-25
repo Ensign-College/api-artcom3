@@ -1,5 +1,5 @@
 import redis from 'redis'
-import { postUserHandler } from './handlers/users.js';
+// import { postUserHandler } from './handlers/users.js';
 
 // Obtener el host y el puerto de las variables de entorno
 const redisHost = process.env.REDIS_HOST;
@@ -12,6 +12,19 @@ const redisClient = redis.createClient({
 
 redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
 
+const addUser = async ({ redisClient, user }) => {
+  console.log(user);
+  const customerKey = `customer:${user.phoneNumber}`;
+  const existingCustomer = await redisClient.json.get(customerKey);
+  if (!existingCustomer) {
+      // Create the user data in Redis
+      await redisClient.json.set(customerKey, '$', user);
+      return user;
+  } else {
+      throw new Error(`Customer ${customerKey} exist`);
+  }
+};
+
 export const handler = async (event) => {
   const { requestContext, rawPath, body } = event;
 
@@ -20,7 +33,20 @@ export const handler = async (event) => {
   event.redisClient = redisClient;
 
   if (rawPath === '/users' && httpMethod === 'POST') {
-    return postUserHandler(event);
+    // return postUserHandler(event);
+
+    const body = JSON.parse(event.body);
+    const redisClient = event.redisClient
+    
+    const user = {
+      firstName: body.firstName,
+      lastName: body.lastName,
+      phoneNumber: body.phoneNumber
+    }
+    // console.log(req.body)
+    const response = await addUser({redisClient, user});
+    
+    res.json({ success: true, message: 'User Created', response });
   
 
   // if (httpMethod === 'GET') {
