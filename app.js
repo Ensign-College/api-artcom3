@@ -122,7 +122,7 @@ export const handler = async (event, context) => {
     
     // USERS GET -> Get users
     else if (httpMethod === 'GET') {
-      if (queryStringParameters.userId) {
+      if (queryStringParameters.userId != null) {
         const userId = queryStringParameters.userId;
         try {
           const response = await getUser({redisClient, userId});
