@@ -141,14 +141,14 @@ export const handler = async (event, context) => {
         try {
           const response = await getAllUsers({redisClient});
           return {
-            statusCode: 500,
+            statusCode: 200,
             body: JSON.stringify({ response })
           }
         }
         catch (err) {
           return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Get all users' })
+            body: JSON.stringify({ message: 'The users cannot be found', err })
           }
         };
       }
@@ -163,21 +163,18 @@ export const handler = async (event, context) => {
 
   } else if (httpMethod === 'GET') {
 
-    const redisClient = await event.redisClient
-
-    const user = {
-      firstName: "Kevin",
-      lastName: "Haro",
-      phoneNumber: 3854615172
+    try {
+      const response = await getAllUsers({redisClient});
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ response })
+      }
     }
-
-    const response = await addUser({redisClient, user});
-
-    // await redisClient.disconnect();
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'GET request received', event, response })
+    catch (err) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: 'The users cannot be found', err })
+      }
     };
   } else if (httpMethod === 'POST') {
     return {
