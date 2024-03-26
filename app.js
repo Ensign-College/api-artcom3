@@ -48,10 +48,10 @@ export const getUser = async ({ redisClient, phoneNumber } ) => {
   await redisClient.connect();
   const customerKey = `customer:${phoneNumber}`
   const existingCustomer = await redisClient.json.get(customerKey);
-  if (!existingCustomer) {
-    await redisClient.disconnect();
-    throw new Error(`Customer ${customerKey} doesn't exist`);
-  }
+  // if (!existingCustomer) {
+  //   await redisClient.disconnect();
+  //   throw new Error(`Customer ${customerKey} doesn't exist`);
+  // }
   await redisClient.disconnect();
   return existingCustomer;
 }
@@ -99,10 +99,10 @@ export const handler = async (event, context) => {
       if (queryStringParameters.userId) {
         const userId = queryStringParameters.userId;
 
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ userId })
-        };
+        // return {
+        //   statusCode: 500,
+        //   body: JSON.stringify({ userId })
+        // };
 
         try {
           const response = await getUser({redisClient, userId});
