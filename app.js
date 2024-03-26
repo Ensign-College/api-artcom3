@@ -48,12 +48,38 @@ export const getUser = async ({ redisClient, userId } ) => {
   await redisClient.connect();
   const customerKey = `customer:${userId}`
   const existingCustomer = await redisClient.json.get(customerKey);
-  // if (!existingCustomer) {
-  //   await redisClient.disconnect();
-  //   throw new Error(`Customer ${customerKey} doesn't exist`);
-  // }
+  if (!existingCustomer) {
+    await redisClient.disconnect();
+    throw new Error(`Customer ${customerKey} doesn't exist`);
+  }
   await redisClient.disconnect();
   return existingCustomer;
+}
+
+/**
+ * Function: Get All Users
+ */
+export const getAllUsers = async ({ redisClient }) => {
+  await redisClient.connect();
+  let cursor = 0;
+  const users = [];
+
+  do {
+    const result = await redisClient.scan(cursor, {MATCH: 'customer*', COUNT: 100});
+    cursor = result.cursor;
+    let keys = result.keys;
+
+    for (const key of keys) {
+      const user = await redisClient.json.get(key);
+      users.push(user);
+    }
+
+    console.log(result)
+    console.log(users)
+  } while (cursor !== 0);
+
+  await redisClient.disconnect();
+  return users;
 }
 
 /**
@@ -86,10 +112,10 @@ export const handler = async (event, context) => {
           statusCode: 200,
           body: JSON.stringify({ message: 'The user has been created.', event, response, context })
         };
-      } catch(error) {
+      } catch(err) {
         return {
           statusCode: 500,
-          body: JSON.stringify({ message: 'The user could not be created.', error })
+          body: JSON.stringify({ message: 'The user could not be created.', err })
         };
       }
     } 
@@ -98,26 +124,42 @@ export const handler = async (event, context) => {
     else if (httpMethod === 'GET') {
       if (queryStringParameters.userId) {
         const userId = queryStringParameters.userId;
-
-        // return {
-        //   statusCode: 500,
-        //   body: JSON.stringify({ userId })
-        // };
-
         try {
           const response = await getUser({redisClient, userId});
           return {
             statusCode: 200,
             body: JSON.stringify({ response })
           };
-        } catch(error) {
+        } catch(err) {
           return {
             statusCode: 500,
-            body: JSON.stringify({ error })
+            body: JSON.stringify({ message: 'The user cannot be found', err })
           };
         }
+      } else {
+        // TODO: Get All Users
+        try {
+          const response = await getAllUsers({redisClient});
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ response })
+          }
+        }
+        catch (err) {
+          return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Get all users' })
+          }
+        };
       }
     }
+
+
+  // PATH: /orders
+  } else if (rawPath === '/orders') {
+
+    
+
 
   } else if (httpMethod === 'GET') {
 

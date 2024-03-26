@@ -1,21 +1,16 @@
 import { Router } from "express";
 
 
-import { addUser, getUser } from '../services/userService.js';
+import { addUser, getUser, getUsers } from '../services/userService.js';
 import { redisClient } from "../index.js"; 
 
 const router = Router();
 
 // * Get All Users
 router.get('/', async (req, res, next) => {
-  const user = {
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    phoneNumber: req.body.phoneNumber
-  }
   // console.log(req.body)
-  const response = await addUser({redisClient, user});
-  res.json({ success: true, message: 'User Created', response });
+  const response = await getUsers({redisClient});
+  res.json({ success: true, response });
 });
 
 // * Get User By Id (phone-number)
