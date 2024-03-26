@@ -44,9 +44,9 @@ const addUser = async ({ redisClient, user }) => {
 /**
  * Function: Add User to Redis Client
  */
-export const getUser = async ({ redisClient, phoneNumber } ) => {
+export const getUser = async ({ redisClient, userId } ) => {
   await redisClient.connect();
-  const customerKey = `customer:${phoneNumber}`
+  const customerKey = `customer:${userId}`
   const existingCustomer = await redisClient.json.get(customerKey);
   // if (!existingCustomer) {
   //   await redisClient.disconnect();
