@@ -1,7 +1,7 @@
 import redis from 'redis'
 // import { postUserHandler } from './handlers/users.js';
 
-// Obtener el host y el puerto de las variables de entorno
+// Get enviroment variables for ElastiCache
 const redisHost = process.env.REDIS_HOST;
 const redisPort = process.env.REDIS_PORT;
 
@@ -15,9 +15,15 @@ const redisClient = redis.createClient({
   ssl: true,
 });
 
-
 redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
 
+//************************
+// * USERS FUNCTIONS
+//************************
+
+/**
+ * Function: Add User to Redis Client
+ */
 const addUser = async ({ redisClient, user }) => {
 
   await redisClient.connect();
@@ -35,35 +41,78 @@ const addUser = async ({ redisClient, user }) => {
   }
 };
 
-export const handler = async (event) => {
-  const { requestContext, rawPath, body } = event;
+/**
+ * Function: Add User to Redis Client
+ */
+export const getUser = async ({ redisClient, phoneNumber } ) => {
+  await redisClient.connect();
+  const customerKey = `customer:${phoneNumber}`
+  const existingCustomer = await redisClient.json.get(customerKey);
+  if (!existingCustomer) {
+    await redisClient.disconnect();
+    throw new Error(`Customer ${customerKey} doesn't exist`);
+  }
+  await redisClient.disconnect();
+  return existingCustomer;
+}
+
+/**
+ * * Main: Entry point for AWS Lambda serverless
+ */
+export const handler = async (event, context) => {
+  const { requestContext, rawPath, body, queryStringParameters } = event;
 
   const httpMethod = requestContext.http.method ?? '';
 
   event.redisClient = redisClient;
 
-  if (rawPath === '/users' && httpMethod === 'POST') {
-    // return postUserHandler(event);
+  // PATH: /user
+  if (rawPath === '/users') {
 
-    const body = JSON.parse(event.body);
-    const redisClient = event.redisClient
-    
-    const user = {
-      firstName: body.firstName,
-      lastName: body.lastName,
-      phoneNumber: body.phoneNumber
-    }
-    // console.log(req.body)
-    const response = await addUser({redisClient, user});
-    
-    
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'User Created', event, response, redisHost, redisPort })
-    };
-
-    // return ({ success: true, message: 'User Created', response });
+    // USERS POST -> Create User
+    if (httpMethod === 'POST') {
+      const body = JSON.parse(event.body);
+      const redisClient = event.redisClient
+      
+      const user = {
+        firstName: body.firstName,
+        lastName: body.lastName,
+        phoneNumber: body.phoneNumber
+      }
   
+      try {
+        const response = await addUser({redisClient, user});
+        return {
+          statusCode: 200,
+          body: JSON.stringify({ message: 'The user has been created.', event, response, context })
+        };
+      } catch(error) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: 'The user could not be created.', error })
+        };
+      }
+    } 
+    
+    // USERS GET -> Get users
+    else if (httpMethod === 'GET') {
+      if (queryStringParameters.userId) {
+        const userId = queryStringParameters.userId;
+
+        try {
+          const response = await getUser({redisClient, userId});
+          return {
+            statusCode: 200,
+            body: JSON.stringify({ response })
+          };
+        } catch(error) {
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ error })
+          };
+        }
+      }
+    }
 
   } else if (httpMethod === 'GET') {
 
