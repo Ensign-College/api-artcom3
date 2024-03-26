@@ -122,24 +122,33 @@ export const handler = async (event, context) => {
     
     // USERS GET -> Get users
     else if (httpMethod === 'GET') {
-      if (queryStringParameters.userId != null) {
+
+      // TODO: Get User by Id
+      if (queryStringParameters) {
+        if (!queryStringParameters.userId) {
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ message: 'userId query param is missing' })
+          };
+        }
         const userId = queryStringParameters.userId;
         try {
-          const response = await getUser({redisClient, userId});
+          const response = await getUser({ redisClient, userId });
           return {
             statusCode: 200,
             body: JSON.stringify({ response })
           };
-        } catch(err) {
+        } catch (err) {
           return {
             statusCode: 500,
             body: JSON.stringify({ message: 'The user cannot be found', err })
           };
+
         }
       } else {
         // TODO: Get All Users
         try {
-          const response = await getAllUsers({redisClient});
+          const response = await getAllUsers({ redisClient });
           return {
             statusCode: 200,
             body: JSON.stringify({ response })
@@ -154,7 +163,6 @@ export const handler = async (event, context) => {
       }
     }
 
-
   // PATH: /orders
   } else if (rawPath === '/orders') {
 
@@ -164,20 +172,25 @@ export const handler = async (event, context) => {
   } else if (httpMethod === 'GET') {
     
     if (queryStringParameters) {
-      if (queryStringParameters.userId) {
-        const userId = queryStringParameters.userId;
-        try {
-          const response = await getUser({redisClient, userId});
-          return {
-            statusCode: 200,
-            body: JSON.stringify({ response })
-          };
-        } catch(err) {
-          return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'The user cannot be found', err })
-          };
-        }
+      if (!queryStringParameters.userId) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: 'userId query param is missing' })
+        };
+      }
+      const userId = queryStringParameters.userId;
+      try {
+        const response = await getUser({redisClient, userId});
+        return {
+          statusCode: 200,
+          body: JSON.stringify({ response })
+        };
+      } catch(err) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: 'The user cannot be found', err })
+        };
+        
       }
     } else {
       // TODO: Get All Users
