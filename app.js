@@ -99,6 +99,11 @@ export const handler = async (event, context) => {
       if (queryStringParameters.userId) {
         const userId = queryStringParameters.userId;
 
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ userId })
+        };
+
         try {
           const response = await getUser({redisClient, userId});
           return {
