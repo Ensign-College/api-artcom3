@@ -163,19 +163,21 @@ export const handler = async (event, context) => {
 
   } else if (httpMethod === 'GET') {
     
-    if (queryStringParameters.userId != null) {
-      const userId = queryStringParameters.userId;
-      try {
-        const response = await getUser({redisClient, userId});
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ response })
-        };
-      } catch(err) {
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ message: 'The user cannot be found', err })
-        };
+    if (queryStringParameters) {
+      if (queryStringParameters.userId) {
+        const userId = queryStringParameters.userId;
+        try {
+          const response = await getUser({redisClient, userId});
+          return {
+            statusCode: 200,
+            body: JSON.stringify({ response })
+          };
+        } catch(err) {
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ message: 'The user cannot be found', err })
+          };
+        }
       }
     } else {
       // TODO: Get All Users
