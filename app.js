@@ -159,8 +159,8 @@ export const getAllProducts = async ({ redisClient }) => {
     let keys = result.keys;
 
     for (const key of keys) {
-      const user = await redisClient.json.get(key);
-      products.push(user);
+      const product = await redisClient.json.get(key);
+      products.push(product);
     }
 
   } while (cursor !== 0);
