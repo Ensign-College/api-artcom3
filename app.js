@@ -115,8 +115,8 @@ const addProduct = async ({ redisClient, product }) => {
   const productId = uuidv4();
   const sku = generateSKU(name, productId);
   const productKey = `product:${productId}`;
-  const existingProduct = await redisClient.json.get(productKey);
   console.log(product);
+  const existingProduct = await redisClient.json.get(productKey);
   if (!existingProduct) {
       // Create the user data in Redis
       product.sku = sku;
@@ -254,6 +254,8 @@ export const handler = async (event, context) => {
 
   // PATH: /products
   } else if (rawPath === '/products') {
+
+    console.log('PRODUCTS');
 
     if (httpMethod === 'POST') {
       const body = JSON.parse(event.body);
