@@ -1,4 +1,5 @@
 import redis from 'redis'
+import { v4 as uuidv4 } from 'uuid';
 // import { postUserHandler } from './handlers/users.js';
 
 // Get enviroment variables for ElastiCache
@@ -82,9 +83,96 @@ export const getAllUsers = async ({ redisClient }) => {
   return users;
 }
 
+//************************
+// * PRODUCT FUNCTIONS
+//************************
+
 /**
- * * Main: Entry point for AWS Lambda serverless
+ * Function: Generate SKU
  */
+function generateSKU(productName, productID) {
+  // Extract the first three characters from the product name
+  const namePrefix = productName.substring(0, 3).toUpperCase();
+  
+  // Take the first eight characters from the UUID
+  const idPrefix = productID.substring(0, 8).toUpperCase();
+  
+  // Combine the two prefixes to form the SKU
+  const sku = namePrefix + '-' + idPrefix;
+  
+  return sku;
+}
+
+/**
+ * Function: Add Product to Redis Client
+ */
+const addProduct = async ({ redisClient, product }) => {
+
+  await redisClient.connect();
+
+  const { name } = product;
+
+  const productId = uuidv4();
+  const sku = generateSKU(name, productId);
+  const productKey = `product:${productId}`;
+  const existingProduct = await redisClient.json.get(productKey);
+  if (!existingProduct) {
+      // Create the user data in Redis
+      product.sku = sku;
+      product.productId = productId;
+      await redisClient.json.set(productKey, '$', product);
+      await redisClient.disconnect();
+      return product;
+  } else {
+      await redisClient.disconnect();
+      throw new Error(`Customer ${productKey} exist`);
+  }
+};
+
+/**
+ * Function: Get Product by Id
+ */
+export const getProduct = async ({ redisClient, productId } ) => {
+  await redisClient.connect();
+  const productKey = `product:${productId}`
+  const existingProduct = await redisClient.json.get(productKey);
+  if (!existingProduct) {
+    await redisClient.disconnect();
+    throw new Error(`Customer ${productKey} doesn't exist`);
+  }
+  await redisClient.disconnect();
+  return existingProduct;
+}
+
+/**
+ * Function: Get All Products
+ */
+export const getAllProducts = async ({ redisClient }) => {
+  await redisClient.connect();
+  let cursor = 0;
+  const products = [];
+
+  do {
+    const result = await redisClient.scan(cursor, {MATCH: 'product*', COUNT: 100});
+    cursor = result.cursor;
+    let keys = result.keys;
+
+    for (const key of keys) {
+      const user = await redisClient.json.get(key);
+      products.push(user);
+    }
+
+    console.log(result)
+    console.log(users)
+  } while (cursor !== 0);
+
+  await redisClient.disconnect();
+  return products;
+}
+
+//***********************************************
+// * MAIN: Entry point for AWS Lambda serverless
+//***********************************************
 export const handler = async (event, context) => {
   const { requestContext, rawPath, body, queryStringParameters } = event;
 
@@ -163,11 +251,72 @@ export const handler = async (event, context) => {
       }
     }
 
-  // PATH: /orders
-  } else if (rawPath === '/orders') {
+  // PATH: /products
+  } else if (rawPath === '/products') {
 
-    
+    if (httpMethod === 'POST') {
+      const body = JSON.parse(event.body);
+      const redisClient = event.redisClient
+      
+      const product = {
+        name: body.name,
+        price: body.price,
+      }
+  
+      try {
+        const response = await addProduct({redisClient, product});
+        return {
+          statusCode: 200,
+          body: JSON.stringify({ message: 'The product has been created.', event, response })
+        };
+      } catch(err) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: 'The product could not be created.', err })
+        };
+      }
 
+    } else if (httpMethod === 'GET') {
+
+      // TODO: Get Product by Id
+      if (queryStringParameters) {
+        if (!queryStringParameters.productId) {
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ message: 'productId query param is missing' })
+          };
+        }
+        const productId = queryStringParameters.productId;
+        try {
+          const response = await getUser({ redisClient, productId });
+          return {
+            statusCode: 200,
+            body: JSON.stringify({ response })
+          };
+        } catch (err) {
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ message: 'The product cannot be found', err })
+          };
+
+        }
+      } else {
+        // TODO: Get All Users
+        try {
+          const response = await getAllProducts({ redisClient });
+          return {
+            statusCode: 200,
+            body: JSON.stringify({ response })
+          }
+        }
+        catch (err) {
+          return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Products cannot be found', err })
+          }
+        };
+      }
+    }
 
   } else if (httpMethod === 'GET') {
     
