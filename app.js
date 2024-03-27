@@ -163,8 +163,6 @@ export const getAllProducts = async ({ redisClient }) => {
       products.push(user);
     }
 
-    console.log(result)
-    console.log(users)
   } while (cursor !== 0);
 
   await redisClient.disconnect();
@@ -291,7 +289,7 @@ export const handler = async (event, context) => {
         }
         const productId = queryStringParameters.productId;
         try {
-          const response = await getUser({ redisClient, productId });
+          const response = await getProduct({ redisClient, productId });
           return {
             statusCode: 200,
             body: JSON.stringify({ response })
