@@ -116,6 +116,7 @@ const addProduct = async ({ redisClient, product }) => {
   const sku = generateSKU(name, productId);
   const productKey = `product:${productId}`;
   const existingProduct = await redisClient.json.get(productKey);
+  console.log(product);
   if (!existingProduct) {
       // Create the user data in Redis
       product.sku = sku;
@@ -278,7 +279,7 @@ export const handler = async (event, context) => {
 
     } else if (httpMethod === 'GET') {
 
-      // TODO: Get Product by Id
+      // Get Product by Id
       if (queryStringParameters) {
         if (!queryStringParameters.productId) {
           return {
@@ -301,7 +302,7 @@ export const handler = async (event, context) => {
 
         }
       } else {
-        // TODO: Get All Users
+        // Get All Products
         try {
           const response = await getAllProducts({ redisClient });
           return {
