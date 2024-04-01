@@ -1,5 +1,6 @@
 import redis from 'redis'
 import { v4 as uuidv4 } from 'uuid';
+import { userPostHandler } from './lambda-path/users';
 // import { postUserHandler } from './handlers/users.js';
 
 // Get enviroment variables for ElastiCache
@@ -18,70 +19,6 @@ const redisClient = redis.createClient({
 
 redisClient.on('error', err => console.error('Error de conexión con ElastiCache:', err));
 
-//************************
-// * USERS FUNCTIONS
-//************************
-
-/**
- * Function: Add User to Redis Client
- */
-const addUser = async ({ redisClient, user }) => {
-
-  await redisClient.connect();
-
-  const customerKey = `customer:${user.phoneNumber}`;
-  const existingCustomer = await redisClient.json.get(customerKey);
-  if (!existingCustomer) {
-      // Create the user data in Redis
-      await redisClient.json.set(customerKey, '$', user);
-      await redisClient.disconnect();
-      return user;
-  } else {
-      await redisClient.disconnect();
-      throw new Error(`Customer ${customerKey} exist`);
-  }
-};
-
-/**
- * Function: Add User to Redis Client
- */
-export const getUser = async ({ redisClient, userId } ) => {
-  await redisClient.connect();
-  const customerKey = `customer:${userId}`
-  const existingCustomer = await redisClient.json.get(customerKey);
-  if (!existingCustomer) {
-    await redisClient.disconnect();
-    throw new Error(`Customer ${customerKey} doesn't exist`);
-  }
-  await redisClient.disconnect();
-  return existingCustomer;
-}
-
-/**
- * Function: Get All Users
- */
-export const getAllUsers = async ({ redisClient }) => {
-  await redisClient.connect();
-  let cursor = 0;
-  const users = [];
-
-  do {
-    const result = await redisClient.scan(cursor, {MATCH: 'customer*', COUNT: 100});
-    cursor = result.cursor;
-    let keys = result.keys;
-
-    for (const key of keys) {
-      const user = await redisClient.json.get(key);
-      users.push(user);
-    }
-
-    console.log(result)
-    console.log(users)
-  } while (cursor !== 0);
-
-  await redisClient.disconnect();
-  return users;
-}
 
 //************************
 // * PRODUCT FUNCTIONS
@@ -184,27 +121,7 @@ export const handler = async (event, context) => {
 
     // USERS POST -> Create User
     if (httpMethod === 'POST') {
-      const body = JSON.parse(event.body);
-      const redisClient = event.redisClient
-      
-      const user = {
-        firstName: body.firstName,
-        lastName: body.lastName,
-        phoneNumber: body.phoneNumber
-      }
-  
-      try {
-        const response = await addUser({redisClient, user});
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ message: 'The user has been created.', event, response, context })
-        };
-      } catch(err) {
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ message: 'The user could not be created.', err })
-        };
-      }
+      return await userPostHandler(event);
     } 
     
     // USERS GET -> Get users
