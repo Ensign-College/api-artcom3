@@ -1,6 +1,7 @@
 import redis from 'redis'
 import { v4 as uuidv4 } from 'uuid';
 import { userPostHandler } from './lambda-path/users';
+import { getAllUsers, getUser } from './lambda-services/userService';
 // import { postUserHandler } from './handlers/users.js';
 
 // Get enviroment variables for ElastiCache
