@@ -1,5 +1,6 @@
 import redis from 'redis'
 import { v4 as uuidv4 } from 'uuid';
+import { testImport } from './lambda-services/userService';
 // import { postUserHandler } from './handlers/users.js';
 
 // Get enviroment variables for ElastiCache
@@ -321,43 +322,13 @@ export const handler = async (event, context) => {
 
   } else if (httpMethod === 'GET') {
     
-    if (queryStringParameters) {
-      if (!queryStringParameters.userId) {
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ message: 'userId query param is missing' })
-        };
-      }
-      const userId = queryStringParameters.userId;
-      try {
-        const response = await getUser({redisClient, userId});
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ response })
-        };
-      } catch(err) {
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ message: 'The user cannot be found', err })
-        };
-        
-      }
-    } else {
-      // TODO: Get All Users
-      try {
-        const response = await getAllUsers({redisClient});
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ response })
-        }
-      }
-      catch (err) {
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ message: 'The users cannot be found', err })
-        }
-      };
+    const moduleMessage = testImport();
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'GET request received', event, moduleMessage: moduleMessage})
     }
+
   } else if (httpMethod === 'POST') {
     return {
       statusCode: 200,

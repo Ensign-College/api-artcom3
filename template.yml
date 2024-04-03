@@ -74,7 +74,7 @@ Resources:
     Properties:
       Handler: app.handler
       Runtime: nodejs20.x
-      CodeUri: .
+      CodeUri: ./
       MemorySize: 256  # Tamaño de memoria en MB
       Timeout: 30  # Límite de tiempo de ejecución en segundos
       Environment:
